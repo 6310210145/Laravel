@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CompanyCRUDController;
 
-Route::resource('companies', CompanyCRUDController::class);
+use App\Http\Controllers\HomeController;
+use GuzzleHttp\Middleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,3 +21,21 @@ Route::resource('companies', CompanyCRUDController::class);
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Route::get('/dashboard', function () {
+//     return view('dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/home', [HomeController::class, 'index'])->middleware('auth')->name('home');
+
+Route::get('post', [HomeController::class, 'post'])->middleware(['auth','admin']);
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::resource('companies', CompanyCRUDController::class)->middleware(['auth','admin']);
+
+require __DIR__.'/auth.php';
